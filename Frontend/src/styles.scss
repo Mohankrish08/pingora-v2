@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Manrope', sans-serif;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(134, 148, 138, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(134, 148, 138, 0.4);
+}
+
+.glass-card {
+  background: rgba(39, 42, 44, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(134, 148, 138, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.input-glass {
+  background: rgba(11, 15, 16, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(134, 148, 138, 0.2);
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary-gradient {
+  background: linear-gradient(180deg, #6ffbbe 0%, #4edea3 100%);
+  color: #003824;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(134, 148, 138, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.gradient-bg {
+  background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.08) 0%, rgba(16, 20, 21, 1) 70%);
+}
+
+.step-progress {
+  background: rgba(134, 148, 138, 0.2);
+  height: 4px;
+  width: 100%;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.step-progress-fill {
+  background: #10b981;
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+.input-pill {
+  background: rgba(16, 20, 21, 0.4);
+  border: 1px solid rgba(60, 74, 66, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-pill:focus-within {
+  border-color: #4edea3;
+  box-shadow: 0 0 0 1px #4edea3;
+  background: rgba(16, 20, 21, 0.6);
+}
+
+.primary-cta {
+  background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.primary-cta:hover {
+  opacity: 0.95;
+}
+
+.primary-cta:active {
+  transform: scale(0.98);
+}
+
+.strength-bar {
+  height: 4px;
+  transition: all 0.3s ease;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: 0;
+  opacity: 0.4;
+}
+
+@keyframes float {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  50% {
+    transform: translate(30px, -20px);
+  }
+
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+.floating {
+  animation: float 10s infinite ease-in-out;
+}
