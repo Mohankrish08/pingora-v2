@@ -1,11 +1,11 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Request
 import uuid
 
 from common.config.redis_client import get_redis_client
 from common.security.password import hash_password, verify_password
 from common.utils.otp import generate_totp_secret, get_totp_provisioning_uri, create_sms_otp, verify_totp
 from common.utils.crypto import aes_encrypt
-from common.utils.jwt_handler import create_access_token
+from common.utils.jwt_handler import create_access_token, decode_refresh_token
 
 
 from schema.auth_schemas import RegisterRequest, RegisterResponse, LoginRequest, LoginResponse, TOTPVerifyRequest, TOTPVerifyResponse
@@ -94,17 +94,19 @@ async def login(payload: LoginRequest):
             display_name=user["display_name"],
             requires_totp=True,
             access_token=None,
+            csrf_token=None,
             message="Password verified. Enter your authenticator code to continue."
         )
     
     # 4. NO TOT - issue token
-    access_token, jti = create_access_token(user_id=user["id"], email=user["email"], phone=user["phone_number"], display_name=user['display_name'], unique_session_id=session_id)
+    access_token, jti, csrf_token = create_access_token(user_id=user["id"], email=user["email"], phone=user["phone_number"], display_name=user['display_name'], unique_session_id=session_id)
     return LoginResponse(
         user_id=user["id"],
         email=user["email"],
         display_name=user["display_name"],
         requires_totp=False,
         access_token=access_token,
+        csrf_token=csrf_token,
         message="Login successful."
     )
 
@@ -131,3 +133,65 @@ async def verify_totp_method(payload: TOTPVerifyRequest):
     # 3. code valid - issue token now
     access_token, jti = create_access_token(user_id=user["id"], email=user["email"], phone=user["phone_number"], display_name=user['display_name'], unique_session_id=session_id)
     return TOTPVerifyResponse(access_token=access_token)
+
+@router.post("/refresh")
+async def refresh_token(request: Request):
+
+    # 1. Get refresh token from HttpOnly
+    refresh_token = request.cookies.get("refresh_token")
+
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token missing"
+        )
+
+    # 2. decode and validate refresh token
+    try:
+        claims = decode_refresh_token(refresh_token)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired refresh token"
+        )
+
+    # 3. Make sure this is actually a refresh token
+    if claims.get("type") != "refresh":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token type"
+        )
+
+    # 4. Get user ID
+    user_id = claims.get("sub")
+    session_id = claims.get("uid")
+
+    if not user_id or not session_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token claims"
+        )
+
+    # 5. Get current user
+    user = await find_by_id(user_id)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found"
+        )
+
+    # 6. Create new access token
+    access_token, jti = create_access_token(
+        user_id=user["id"],
+        email=user["email"],
+        phone=user["phone_number"],
+        display_name=user['display_name'],
+        unique_session_id=session_id
+    )
+
+    # 7. Return new access token
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
+    }

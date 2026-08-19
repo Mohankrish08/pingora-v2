@@ -5,6 +5,7 @@
             "name": "FastAPI: auth-service (uvicorn)",
             "type": "debugpy",
             "request": "launch",
+            "python": "D:\\Anaconda\\python.exe",
             "module": "uvicorn",
             "args": [
                 "main:app",

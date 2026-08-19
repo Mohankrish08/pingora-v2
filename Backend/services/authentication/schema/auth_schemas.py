@@ -54,6 +54,7 @@ class LoginResponse(BaseModel):
     display_name: str
     requires_totp: bool
     access_token: str | None = None
+    csrf_token: str | None = None
     token_type: str = "Bearer"
     message: str = "Login Successful"
 
