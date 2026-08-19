@@ -6,6 +6,10 @@ __pycache__/
 # C extensions
 *.so
 
+# Ignore .vscode folder and launch json file
+.vscode/
+.vscode/launch.json
+
 # Distribution / packaging
 .Python
 build/
