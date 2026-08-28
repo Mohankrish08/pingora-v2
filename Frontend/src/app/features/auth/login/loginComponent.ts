@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -17,6 +17,7 @@ export class LoginComponent {
 
   // Inject
   authService = inject(AuthService);
+  router = inject(Router);
   
 
   constructor(private fb: FormBuilder) {
@@ -42,6 +43,7 @@ export class LoginComponent {
     this.authService.login(this.loginForm.value.email, this.loginForm.value.password).subscribe({
       next: (res: any) => {
         console.log('Login successful:', res);
+        this.router.navigate(['/landing']);
       }
     })
   }

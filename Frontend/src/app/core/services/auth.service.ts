@@ -1,9 +1,10 @@
-import { Injectable, signal } from "@angular/core";
+import { inject, Injectable, PLATFORM_ID, signal } from "@angular/core";
 import { environment } from "../../../environment/environment";
 import { HttpClient } from "@angular/common/http";
 import { CsrfService } from "./csrf.service";
 import { tap } from "rxjs";
 import { decodeJwtPayload } from "../utils/jwt-decode.util";
+import { isPlatformBrowser } from "@angular/common";
 
 interface LoginResponse {
     access_token: string;
@@ -14,7 +15,13 @@ interface LoginResponse {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
     private baseUrl = environment.authAPI;
-    private accessToken = signal<string | null>(null);
+    private platformId = inject(PLATFORM_ID);
+
+    private accessToken = signal<string | null>(
+        isPlatformBrowser(this.platformId)
+            ? localStorage.getItem('accessToken')
+            : null
+    );
 
     constructor(
         private http: HttpClient,
@@ -27,6 +34,9 @@ export class AuthService {
 
     setAccessToken(token: string) {
         this.accessToken.set(token);
+        if (isPlatformBrowser(this.platformId)) {
+            localStorage.setItem('accessToken', token);
+        }
     }
 
     getAccessToken(): string | null {
@@ -35,6 +45,9 @@ export class AuthService {
 
     clearAccessToken() {
         this.accessToken.set(null);
+        if (isPlatformBrowser(this.platformId)) {
+            localStorage.removeItem('accessToken');
+        }
     }
 
     login(email: string, password: string) {
