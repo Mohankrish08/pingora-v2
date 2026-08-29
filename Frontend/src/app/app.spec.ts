@@ -1,23 +1,31 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+
 import { App } from './app';
 
 describe('App', () => {
   beforeEach(async () => {
+    // App renders <router-outlet>, so the router must be provided.
     await TestBed.configureTestingModule({
       imports: [App],
+      providers: [provideRouter([])],
     }).compileComponents();
   });
 
   it('should create the app', () => {
     const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+
+    expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('should render title', async () => {
+  it('renders the router outlet', async () => {
+    // The generated spec asserted an <h1> reading "Hello, groupchat" from the
+    // Angular starter template. That markup was replaced by <router-outlet>
+    // long ago, so the assertion could never pass.
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
+
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, groupchat');
+    expect(compiled.querySelector('router-outlet')).toBeTruthy();
   });
 });

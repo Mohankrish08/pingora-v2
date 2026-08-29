@@ -1,2 +1,61 @@
-<p>landing-page works!</p>
-<button (click)="onLogout()">LogOut</button>>
+<div class="min-h-screen bg-background text-on-background flex items-center justify-center p-4">
+  <main class="w-full max-w-lg">
+    <div class="glass-card rounded-[24px] p-8 md:p-10">
+
+      <div class="flex items-center gap-4 mb-8">
+        <div class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center border border-outline-variant/30">
+          <span class="material-symbols-outlined text-primary text-[24px]" style="font-variation-settings: 'FILL' 1;">chat_bubble</span>
+        </div>
+        <div>
+          <h1 class="text-[24px] font-bold text-on-surface tracking-tight">Pingora</h1>
+          <p class="text-sm text-on-surface-variant">You are signed in</p>
+        </div>
+      </div>
+
+      @if (errorMessage(); as message) {
+        <div role="alert"
+             class="mb-6 rounded-xl border border-error/30 bg-error/10 px-4 py-3 flex items-start gap-3">
+          <span class="material-symbols-outlined text-error text-[20px] shrink-0">error</span>
+          <p class="text-sm text-error">{{ message }}</p>
+        </div>
+      }
+
+      @if (user(); as account) {
+        <dl class="space-y-3 mb-8 rounded-xl bg-surface-container-low border border-outline-variant/30 p-5">
+          @if (account.displayName) {
+            <div class="flex justify-between gap-4">
+              <dt class="text-sm text-on-surface-variant">Name</dt>
+              <dd class="text-sm text-on-surface font-medium">{{ account.displayName }}</dd>
+            </div>
+          }
+          <div class="flex justify-between gap-4">
+            <dt class="text-sm text-on-surface-variant">Email</dt>
+            <dd class="text-sm text-on-surface font-medium break-all">{{ account.email }}</dd>
+          </div>
+          <div class="flex justify-between gap-4">
+            <dt class="text-sm text-on-surface-variant">Roles</dt>
+            <dd class="text-sm text-on-surface font-medium">{{ account.roles.join(', ') }}</dd>
+          </div>
+        </dl>
+      } @else {
+        <p class="text-sm text-on-surface-variant mb-8">Loading your profile…</p>
+      }
+
+      <div class="space-y-3">
+        <button type="button" (click)="onLogout(false)" [disabled]="signingOut()"
+                class="btn-primary-gradient w-full rounded-xl py-3.5 text-[13px] font-bold flex items-center justify-center gap-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+          <span>{{ signingOut() ? 'Signing out…' : 'Sign out' }}</span>
+          @if (!signingOut()) {
+            <span class="material-symbols-outlined text-[18px]">logout</span>
+          }
+        </button>
+
+        <button type="button" (click)="onLogout(true)" [disabled]="signingOut()"
+                class="btn-ghost w-full rounded-xl py-2.5 text-[13px] font-semibold text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/30 transition-colors disabled:opacity-60">
+          Sign out of all devices
+        </button>
+      </div>
+
+    </div>
+  </main>
+</div>

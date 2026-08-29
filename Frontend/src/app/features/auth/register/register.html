@@ -12,114 +12,214 @@
     </div>
 
     <div class="glass-card p-8 md:p-10 rounded-[2rem] relative overflow-hidden">
-      <div class="mb-8">
-        <div class="flex justify-between items-end mb-3">
+
+      @if (created(); as account) {
+        <!-- ── Step 2: authenticator setup ──────────────────────────────── -->
+        <div class="mb-8">
           <div class="flex flex-col">
             <span class="font-label-xs text-label-xs text-primary uppercase tracking-widest mb-1">Account Setup</span>
-            <h2 class="font-headline-md text-headline-md text-on-surface">Step 1 of 2: Basic Info</h2>
-          </div>
-        </div>
-        <div class="step-progress">
-          <div class="step-progress-fill"></div>
-        </div>
-      </div>
-
-      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-5">
-        <div class="space-y-2">
-          <label class="font-label-md text-label-md text-on-surface-variant ml-1" for="full-name">Display name</label>
-          <div class="input-pill flex items-center px-4 py-3.5 rounded-2xl">
-            <span class="material-symbols-outlined text-on-surface-variant mr-3 text-[20px]">person</span>
-            <input
-              id="full-name"
-              formControlName="display_name"
-              type="text"
-              placeholder="Enter your display Name"
-              class="bg-transparent border-none outline-none w-full text-on-surface font-body-sm placeholder:text-outline/50 p-0 focus:ring-0"
-            />
+            <h2 class="font-headline-md text-headline-md text-on-surface">Step 2 of 2: Secure your account</h2>
           </div>
         </div>
 
-        <div class="space-y-2">
-          <label class="font-label-md text-label-md text-on-surface-variant ml-1" for="full-name">Full Name</label>
-          <div class="input-pill flex items-center px-4 py-3.5 rounded-2xl">
-            <span class="material-symbols-outlined text-on-surface-variant mr-3 text-[20px]">Phone</span>
-            <input
-              id="phone"
-              formControlName="phone_number"
-              type="text"
-              placeholder="Enter your Phone Number"
-              class="bg-transparent border-none outline-none w-full text-on-surface font-body-sm placeholder:text-outline/50 p-0 focus:ring-0"
-            />
+        <div class="flex items-start gap-3 mb-6 p-4 rounded-2xl bg-primary-container/20 border border-primary/20">
+          <span class="material-symbols-outlined text-primary text-[20px] shrink-0">check_circle</span>
+          <p class="font-body-sm text-body-sm text-on-surface">
+            Account created for <strong>{{ account.email }}</strong>. We sent a
+            verification code to your phone.
+          </p>
+        </div>
+
+        <div class="space-y-4">
+          <p class="font-body-sm text-body-sm text-on-surface-variant">
+            Add this key to your authenticator app (Google Authenticator, 1Password,
+            Authy). You will need a code from it every time you sign in.
+          </p>
+
+          @if (totpSecret(); as secret) {
+            <div class="input-pill flex items-center px-4 py-3.5 rounded-2xl gap-3">
+              <span class="material-symbols-outlined text-on-surface-variant text-[20px]">key</span>
+              <code class="font-mono text-body-sm text-on-surface break-all select-all flex-1">{{ secret }}</code>
+              <button type="button" (click)="copySecret()"
+                      [attr.aria-label]="'Copy setup key'"
+                      class="text-on-surface-variant hover:text-on-surface transition-colors shrink-0">
+                <span class="material-symbols-outlined text-[20px]">{{ copied() ? 'check' : 'content_copy' }}</span>
+              </button>
+            </div>
+          }
+
+          <div class="flex items-start gap-3 p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30">
+            <span class="material-symbols-outlined text-on-surface-variant text-[20px] shrink-0">warning</span>
+            <p class="font-label-xs text-label-xs text-on-surface-variant">
+              This key is shown once and cannot be recovered. Save it before you
+              continue &mdash; without it you will not be able to sign in.
+            </p>
+          </div>
+
+          <button type="button" (click)="goToLogin()"
+                  class="primary-cta w-full py-4 px-6 rounded-2xl text-on-primary-fixed font-label-md flex items-center justify-center gap-2 mt-2 shadow-lg shadow-primary-container/10">
+            <span>I have saved it &mdash; continue to sign in</span>
+            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+          </button>
+        </div>
+
+      } @else {
+        <!-- ── Step 1: basic info ───────────────────────────────────────── -->
+        <div class="mb-8">
+          <div class="flex justify-between items-end mb-3">
+            <div class="flex flex-col">
+              <span class="font-label-xs text-label-xs text-primary uppercase tracking-widest mb-1">Account Setup</span>
+              <h2 class="font-headline-md text-headline-md text-on-surface">Step 1 of 2: Basic Info</h2>
+            </div>
+          </div>
+          <div class="step-progress">
+            <div class="step-progress-fill"></div>
           </div>
         </div>
 
-        <div class="space-y-2">
-          <label class="font-label-md text-label-md text-on-surface-variant ml-1" for="email">Work Email</label>
-          <div class="input-pill flex items-center px-4 py-3.5 rounded-2xl">
-            <span class="material-symbols-outlined text-on-surface-variant mr-3 text-[20px]">mail</span>
-            <input
-              id="email"
-              formControlName="email"
-              type="email"
-              placeholder="name@company.com"
-              class="bg-transparent border-none outline-none w-full text-on-surface font-body-sm placeholder:text-outline/50 p-0 focus:ring-0"
-            />
+        @if (errorMessage(); as message) {
+          <div role="alert" aria-live="assertive"
+               class="mb-6 rounded-2xl border border-error/30 bg-error/10 px-4 py-3 flex items-start gap-3">
+            <span class="material-symbols-outlined text-error text-[20px] shrink-0">error</span>
+            <p class="font-body-sm text-body-sm text-error">{{ message }}</p>
           </div>
+        }
+
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-5">
+          <div class="space-y-2">
+            <label class="font-label-md text-label-md text-on-surface-variant ml-1" for="display-name">Display name</label>
+            <div class="input-pill flex items-center px-4 py-3.5 rounded-2xl">
+              <span class="material-symbols-outlined text-on-surface-variant mr-3 text-[20px]">person</span>
+              <input
+                id="display-name"
+                formControlName="display_name"
+                type="text"
+                autocomplete="nickname"
+                placeholder="How should we call you?"
+                class="bg-transparent border-none outline-none w-full text-on-surface font-body-sm placeholder:text-outline/50 p-0 focus:ring-0"
+              />
+            </div>
+            @if (registerForm.get('display_name')?.touched && registerForm.get('display_name')?.invalid) {
+              <p class="font-label-xs text-label-xs text-error ml-1">Between 2 and 50 characters.</p>
+            }
+            @if (serverError('display_name'); as message) {
+              <p class="font-label-xs text-label-xs text-error ml-1">{{ message }}</p>
+            }
+          </div>
+
+          <div class="space-y-2">
+            <label class="font-label-md text-label-md text-on-surface-variant ml-1" for="phone">Phone number</label>
+            <div class="input-pill flex items-center px-4 py-3.5 rounded-2xl">
+              <span class="material-symbols-outlined text-on-surface-variant mr-3 text-[20px]">smartphone</span>
+              <input
+                id="phone"
+                formControlName="phone_number"
+                type="tel"
+                autocomplete="tel"
+                placeholder="+14155552671"
+                class="bg-transparent border-none outline-none w-full text-on-surface font-body-sm placeholder:text-outline/50 p-0 focus:ring-0"
+              />
+            </div>
+            @if (registerForm.get('phone_number')?.touched && registerForm.get('phone_number')?.invalid) {
+              <p class="font-label-xs text-label-xs text-error ml-1">
+                Include the country code, for example +14155552671.
+              </p>
+            }
+            @if (serverError('phone_number'); as message) {
+              <p class="font-label-xs text-label-xs text-error ml-1">{{ message }}</p>
+            }
+          </div>
+
+          <div class="space-y-2">
+            <label class="font-label-md text-label-md text-on-surface-variant ml-1" for="email">Work Email</label>
+            <div class="input-pill flex items-center px-4 py-3.5 rounded-2xl">
+              <span class="material-symbols-outlined text-on-surface-variant mr-3 text-[20px]">mail</span>
+              <input
+                id="email"
+                formControlName="email"
+                type="email"
+                autocomplete="email"
+                placeholder="name@company.com"
+                class="bg-transparent border-none outline-none w-full text-on-surface font-body-sm placeholder:text-outline/50 p-0 focus:ring-0"
+              />
+            </div>
+            @if (registerForm.get('email')?.touched && registerForm.get('email')?.invalid) {
+              <p class="font-label-xs text-label-xs text-error ml-1">Enter a valid email address.</p>
+            }
+            @if (serverError('email'); as message) {
+              <p class="font-label-xs text-label-xs text-error ml-1">{{ message }}</p>
+            }
+          </div>
+
+          <div class="space-y-2">
+            <label class="font-label-md text-label-md text-on-surface-variant ml-1" for="password">Password</label>
+            <div class="input-pill flex items-center px-4 py-3.5 rounded-2xl">
+              <span class="material-symbols-outlined text-on-surface-variant mr-3 text-[20px]">lock</span>
+              <input
+                id="password"
+                formControlName="password"
+                [type]="showPassword() ? 'text' : 'password'"
+                autocomplete="new-password"
+                placeholder="Create a secure password"
+                (input)="onPasswordInput($any($event.target).value)"
+                class="bg-transparent border-none outline-none w-full text-on-surface font-body-sm placeholder:text-outline/50 p-0 focus:ring-0"
+              />
+              <button type="button" (click)="togglePassword()"
+                      [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+                      class="text-on-surface-variant hover:text-on-surface transition-colors">
+                <span class="material-symbols-outlined text-[20px]">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
+              </button>
+            </div>
+
+            <div class="flex gap-1 mt-2 px-1">
+              @for (i of [0, 1, 2, 3]; track i) {
+                <div class="strength-bar flex-1 rounded-full" [style.background-color]="barColor(i)"></div>
+              }
+            </div>
+            <p class="font-label-xs text-label-xs text-on-surface-variant ml-1 mt-1">{{ strengthText() }}</p>
+
+            @if (serverError('password'); as message) {
+              <p class="font-label-xs text-label-xs text-error ml-1">{{ message }}</p>
+            }
+          </div>
+
+          <button
+            type="submit"
+            [disabled]="submitting()"
+            class="primary-cta w-full py-4 px-6 rounded-2xl text-on-primary-fixed font-label-md flex items-center justify-center gap-2 mt-4 shadow-lg shadow-primary-container/10 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            <span>{{ submitting() ? 'Creating your account…' : 'Continue to Profile Setup' }}</span>
+            @if (!submitting()) {
+              <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+            }
+          </button>
+        </form>
+
+        <div class="flex items-center my-8">
+          <div class="flex-1 h-[1px] bg-outline-variant/30"></div>
+          <span class="px-4 font-label-xs text-label-xs text-on-surface-variant uppercase tracking-widest">Or sign up with</span>
+          <div class="flex-1 h-[1px] bg-outline-variant/30"></div>
         </div>
 
-        <div class="space-y-2">
-          <label class="font-label-md text-label-md text-on-surface-variant ml-1" for="password">Password</label>
-          <div class="input-pill flex items-center px-4 py-3.5 rounded-2xl">
-            <span class="material-symbols-outlined text-on-surface-variant mr-3 text-[20px]">lock</span>
-            <input
-              id="password"
-              formControlName="password"
-              [type]="showPassword ? 'text' : 'password'"
-              placeholder="Create a secure password"
-              (input)="onPasswordInput($any($event.target).value)"
-              class="bg-transparent border-none outline-none w-full text-on-surface font-body-sm placeholder:text-outline/50 p-0 focus:ring-0"
-            />
-            <button type="button" (click)="togglePassword()" class="text-on-surface-variant hover:text-on-surface transition-colors">
-              <span class="material-symbols-outlined text-[20px]">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
-            </button>
-          </div>
-          <div class="flex gap-1 mt-2 px-1">
-            <div *ngFor="let i of [0,1,2,3]" class="strength-bar flex-1 rounded-full" [style.background-color]="barColor(i)"></div>
-          </div>
-          <p class="font-label-xs text-label-xs text-on-surface-variant ml-1 mt-1">{{ strengthText() }}</p>
+        <div class="grid grid-cols-2 gap-4">
+          <button type="button" class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-outline-variant/30 bg-surface-container-low hover:bg-surface-container transition-all active:scale-95">
+            <span class="material-symbols-outlined text-on-surface-variant text-[20px]">vpn_key</span>
+            <span class="font-label-md text-label-md text-on-surface">SSO</span>
+          </button>
+          <button type="button" class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-outline-variant/30 bg-surface-container-low hover:bg-surface-container transition-all active:scale-95">
+            <span class="material-symbols-outlined text-on-surface-variant text-[20px]">phonelink_setup</span>
+            <span class="font-label-md text-label-md text-on-surface">Device</span>
+          </button>
         </div>
-
-        <button
-          type="submit"
-          class="primary-cta w-full py-4 px-6 rounded-2xl text-on-primary-fixed font-label-md flex items-center justify-center gap-2 mt-4 shadow-lg shadow-primary-container/10"
-        >
-          <span>Continue to Profile Setup</span>
-          <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-        </button>
-      </form>
-
-      <div class="flex items-center my-8">
-        <div class="flex-1 h-[1px] bg-outline-variant/30"></div>
-        <span class="px-4 font-label-xs text-label-xs text-on-surface-variant uppercase tracking-widest">Or sign up with</span>
-        <div class="flex-1 h-[1px] bg-outline-variant/30"></div>
-      </div>
-
-      <div class="grid grid-cols-2 gap-4">
-        <button class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-outline-variant/30 bg-surface-container-low hover:bg-surface-container transition-all active:scale-95">
-          <span class="material-symbols-outlined text-on-surface-variant text-[20px]">vpn_key</span>
-          <span class="font-label-md text-label-md text-on-surface">SSO</span>
-        </button>
-        <button class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-outline-variant/30 bg-surface-container-low hover:bg-surface-container transition-all active:scale-95">
-          <span class="material-symbols-outlined text-on-surface-variant text-[20px]">phonelink_setup</span>
-          <span class="font-label-md text-label-md text-on-surface">Device</span>
-        </button>
-      </div>
+      }
     </div>
 
     <div class="mt-8 text-center">
       <p class="font-body-sm text-body-sm text-on-surface-variant">
         Already have an account?
-        <a class="text-primary font-bold hover:underline ml-1" href="/login">Sign in</a>
+        <!-- routerLink, not href: a plain href triggers a full page reload and
+             throws away the in-memory session. -->
+        <a class="text-primary font-bold hover:underline ml-1" routerLink="/login">Sign in</a>
       </p>
     </div>
   </main>

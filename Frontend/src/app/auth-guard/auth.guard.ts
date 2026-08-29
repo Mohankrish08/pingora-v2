@@ -1,16 +1,24 @@
-import { inject, PLATFORM_ID } from "@angular/core";
-import { CanActivateFn, Router } from "@angular/router";
-import { AuthService } from "../core/services/auth.service";
-import { isPlatformBrowser } from "@angular/common";
-import { catchError, map, of } from "rxjs";
+import { inject } from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
+import { catchError, map, of } from 'rxjs';
 
-export const authGuard: CanActivateFn = () => {
-    const authService = inject(AuthService);
-    const router = inject(Router);
+import { AuthService } from '../core/services/auth.service';
 
-    if (authService.isAuthenticated()) {
-        return true;
-    }
+export const authGuard: CanActivateFn = (_route, state) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
 
-    return router.createUrlTree(['/login']);
+  if (authService.isAuthenticated()) {
+    return true;
+  }
+
+  const denied = () =>
+    router.createUrlTree(['/login'], {
+      queryParams: { returnUrl: state.url },
+    });
+
+  return authService.refresh().pipe(
+    map(() => true as const),
+    catchError(() => of(denied())),
+  );
 };

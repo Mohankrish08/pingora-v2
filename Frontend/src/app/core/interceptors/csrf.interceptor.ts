@@ -1,24 +1,33 @@
-import { HttpInterceptorFn } from "@angular/common/http"
-import { inject } from "@angular/core"
-import { CsrfService } from "../services/csrf.service"
+import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
 
-const CSRF_SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS', 'TRACE'])
+import { environment } from '../../../environment/environment';
+import { CsrfService } from '../services/csrf.service';
+
+/** Methods that cannot change state, so they need no CSRF proof. */
+const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS', 'TRACE']);
 
 export const csrfInterceptor: HttpInterceptorFn = (req, next) => {
-    const csrfService = inject(CsrfService)
+  const csrfService = inject(CsrfService);
 
-    if (CSRF_SAFE_METHODS.has(req.method)) {
-        return next(req)
-    }
+  if (SAFE_METHODS.has(req.method.toUpperCase())) {
+    return next(req);
+  }
 
-    const token = csrfService.getToken()
-    if (!token) {
-        return next(req)
-    }
+  const isOwnApi =
+    req.url.startsWith(environment.authAPI) ||
+    req.url.startsWith(environment.adminAPI) ||
+    req.url.startsWith('/');
 
-    const cloned = req.clone({
-        setHeaders: { 'X-CSRF-Token': token },
-    });
+  const token = csrfService.getToken();
+  if (!token || !isOwnApi) {
+    return next(req);
+  }
 
-    return next(cloned);
-}
+  return next(
+    req.clone({
+      setHeaders: { [environment.csrfHeaderName]: token },
+      withCredentials: true,
+    }),
+  );
+};

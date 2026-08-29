@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# .Angular
+*.angular/
+
 # Node.js dependencies
 node_modules/
 
