@@ -1,0 +1,97 @@
+# Full local stack: redis + services + nginx gateway.
+#
+#   docker compose up --build
+#
+# Everything reachable through the gateway on http://localhost. Service ports
+# are exposed as well for direct debugging; drop those `ports:` blocks in any
+# deployed environment so only the gateway is reachable.
+
+name: pingora
+
+services:
+  redis:
+    image: redis:7.4-alpine
+    # Persist to disk so OTPs and rate-limit windows survive a restart.
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks: [backend]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  authentication:
+    build:
+      # Context is Backend/ so the image can pull in common-helpers/.
+      context: .
+      dockerfile: services/authentication/Dockerfile
+    env_file:
+      - .env
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      SERVICE_NAME: authentication
+      RSA_PRIVATE_KEY_PATH: /app/keys/private.pem
+      RSA_PUBLIC_KEY_PATH: /app/keys/public.pem
+    volumes:
+      # Mount the key pair rather than baking it into the image. Read-only:
+      # the container must never be able to rewrite its own signing key.
+      - ./keys:/app/keys:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks: [backend]
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+  administration:
+    build:
+      context: .
+      dockerfile: services/administration/Dockerfile
+    env_file:
+      - .env
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      SERVICE_NAME: administration
+      RSA_PRIVATE_KEY_PATH: /app/keys/private.pem
+      RSA_PUBLIC_KEY_PATH: /app/keys/public.pem
+    volumes:
+      - ./keys:/app/keys:ro
+    ports:
+      - "8001:8001"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks: [backend]
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+  gateway:
+    image: nginx:1.27-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./gateway/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - authentication
+      - administration
+    networks: [backend]
+    restart: unless-stopped
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  redis-data:

@@ -1,0 +1,15 @@
+# Test and lint tooling. Install alongside a service's requirements.txt:
+#     pip install -r services/authentication/requirements.txt -r requirements-dev.txt
+#     pip install -e common-helpers
+#     pytest
+
+pytest==8.3.4
+pytest-asyncio==0.25.0
+
+# Exercises the real redis-py async API without needing a server.
+fakeredis==2.26.2
+
+# Required by fastapi.testclient
+httpx==0.28.1
+
+ruff==0.8.6

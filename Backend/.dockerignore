@@ -1,0 +1,24 @@
+**/__pycache__/
+**/*.py[cod]
+**/*.egg-info/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/.venv/
+**/venv/
+**/.vscode/
+**/.idea/
+
+# Never bake secrets or key material into an image layer.
+.env
+**/.env
+**/*.env
+keys/
+**/keys/
+*.pem
+
+notebook/
+**/*.ipynb
+.git/
+.gitignore
+README.md

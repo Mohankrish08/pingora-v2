@@ -1,0 +1,35 @@
+# --- Web framework -----------------------------------------------------
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+pydantic==2.10.4
+pydantic-settings==2.7.0
+
+# --- Database ----------------------------------------------------------
+supabase==2.11.0
+
+# --- JWT ---------------------------------------------------------------
+python-jose[cryptography]==3.4.0
+
+# --- Cryptography ------------------------------------------------------
+# Pinned directly rather than relied on transitively: crypto.py imports it
+# for RSA-OAEP and AES-GCM, so the version must be explicit.
+cryptography==44.0.0
+
+# --- Password hashing --------------------------------------------------
+# Argon2id is what security/password.py actually uses. This was missing
+# before, so every login raised ImportError at runtime.
+argon2-cffi==23.1.0
+
+# --- Redis (OTP, revocation, rate limiting) ----------------------------
+redis[hiredis]==5.2.1
+
+# --- OTP / TOTP --------------------------------------------------------
+pyotp==2.9.0
+
+# --- Validation --------------------------------------------------------
+email-validator==2.2.0
+
+# NOTE: common-helpers is installed separately by the Dockerfile (it lives
+# outside this build context at runtime). Do NOT add an editable path here:
+# "-e ../../common-helpers" resolves relative to the image working directory
+# and fails the build.

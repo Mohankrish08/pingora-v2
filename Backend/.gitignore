@@ -1,7 +1,24 @@
+# ─── Secrets: never commit ────────────────────────────────────────────
+# Private keys, symmetric keys and filled-in environment files.
+keys/
+*.pem
+*.key
+*.p12
+*.pfx
+.env
+.env.*
+!.env.example
+
+# Local scratch
+notebook/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
 *$py.class
+
+# Mirgration file
+*.sql
 
 # C extensions
 *.so
@@ -14,9 +31,6 @@ node_modules/
 build/
 develop-eggs/
 dist/
-keys/
-scripts/
-notebook/
 downloads/
 eggs/
 .eggs/
